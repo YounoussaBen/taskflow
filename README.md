@@ -1,41 +1,110 @@
-# Infusi Take-Home Assignment
+**TaskFlow – Role-Based Task Management App**
 
-Role-based task management app using Next.js.
+A lightweight task management app built with **Next.js 15 + TypeScript**, showcasing **Role-Based Access Control (RBAC)** with three user roles: Admin, Manager, and Member.
+Developed for the **Infusi Take-Home Assignment**.
 
-## 🚀 Quick Start
+---
 
-1. **Clone and Install**
+### 🚀 Quick Start
 
-   ```bash
-   git clone <your-repo>
-   cd
-   bun install
-   ```
+**Requirements:** Node.js 20+ or Bun 1.0+
 
-2. **Environment Setup**
+```bash
+git clone https://github.com/YounoussaBen/taskflow
+cd taskflow
+bun install
+bun dev
+```
 
-   ```bash
-   cp .env.example .env.local
-   # Edit .env.local with your values
-   ```
+Visit **[http://localhost:3000](http://localhost:3000)**
 
-3. **Development**
+---
 
-   ```bash
-   bun dev
-   ```
+### 🔐 Demo Accounts
 
-4. **Open** [http://localhost:3000](http://localhost:3000)
+| Role    | Email                                               | Password |
+| ------- | --------------------------------------------------- | -------- |
+| Admin   | [admin@taskflow.com](mailto:admin@taskflow.com)     | 123456   |
+| Manager | [manager@taskflow.com](mailto:manager@taskflow.com) | 123456   |
+| Member  | [member@taskflow.com](mailto:member@taskflow.com)   | 123456   |
 
-## 🛠️ Available Scripts
+---
 
-| Script             | Description                             |
-| ------------------ | --------------------------------------- |
-| `bun dev`          | Start development server with Turbopack |
-| `bun build`        | Build production application            |
-| `bun start`        | Start production server                 |
-| `bun lint`         | Run ESLint                              |
-| `bun lint:fix`     | Fix ESLint issues                       |
-| `bun format`       | Format code with Prettier               |
-| `bun format:check` | Check code formatting                   |
-| `bun type-check`   | Run TypeScript type checking            |
+### 📋 Features
+
+- Authentication with route protection
+- Full **RBAC enforcement** (UI + API)
+- CRUD operations on projects and tasks
+- Admin panel with role management and analytics
+- Responsive and modern UI (Tailwind + Radix)
+- Loading, empty, and error states handled cleanly
+
+---
+
+### 👥 Role Permissions
+
+| Action                   | Admin | Manager           | Member         |
+| ------------------------ | ----- | ----------------- | -------------- |
+| View all projects        | ✅    | ✅                | ✅             |
+| Create/edit/delete tasks | ✅    | ✅ (own projects) | ❌             |
+| Mark tasks as done       | ✅    | ✅                | ✅ (own tasks) |
+| Manage user roles        | ✅    | ❌                | ❌             |
+| Access Admin Panel       | ✅    | ❌                | ❌             |
+
+---
+
+### ⚙️ RBAC Overview
+
+The RBAC logic is enforced across **middleware**, **API routes**, and **UI components**.
+
+Flow:
+
+```
+User login → Role validation → Route/API guard → Action allowed or blocked
+```
+
+Example:
+A Manager can only modify tasks belonging to their own projects. A Member can update only their assigned task’s status.
+
+---
+
+### 📊 Admin Panel
+
+Accessible only to Admins at `/admin`.
+Includes:
+
+- User list with role update controls
+- Optional analytics: tasks done vs. pending
+
+---
+
+### 🧩 Tech Stack
+
+Next.js 15 • TypeScript • Tailwind CSS • Radix UI • Lucide Icons • Bun runtime
+
+---
+
+### ✅ Assignment Checklist
+
+**Question 1 – Authentication & Role Access**
+
+- Login with seed users
+- Protected `/dashboard` and `/tasks`
+- Admin link visible only to admin
+
+**Question 2 – Projects & Tasks**
+
+- CRUD tasks
+- Role restrictions enforced
+- Loading and error states
+
+**Question 3 – Admin Panel**
+
+- `/admin` page
+- Role editing
+- Task analytics
+
+---
+
+**Deployed on Vercel** — [https://taskflow.vercel.app](https://taskflow.vercel.app)
+**GitHub Repository** — [https://github.com/YounoussaBen/taskflow](https://github.com/YounoussaBen/taskflow)
