@@ -1,0 +1,14 @@
+[
+  {
+    "id": 1,
+    "name": "Website Revamp",
+    "description": "Marketing site refresh",
+    "owner": "manager@taskflow.com"
+  },
+  {
+    "id": 2,
+    "name": "Mobile App",
+    "description": "v1 onboarding flow",
+    "owner": "manager@taskflow.com"
+  }
+]
