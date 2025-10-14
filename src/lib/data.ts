@@ -3,10 +3,28 @@ import usersData from "@/data/users.json"
 import projectsData from "@/data/projects.json"
 import tasksData from "@/data/tasks.json"
 
-// In-memory data stores
-const users: User[] = usersData as User[]
-const projects: Project[] = projectsData as Project[]
-let tasks: Task[] = tasksData as Task[]
+// Using globalThis to prevent reinitialization during development
+declare global {
+  var appData:
+    | {
+        users: User[]
+        projects: Project[]
+        tasks: Task[]
+      }
+    | undefined
+}
+
+if (!globalThis.appData) {
+  globalThis.appData = {
+    users: usersData as User[],
+    projects: projectsData as Project[],
+    tasks: tasksData as Task[],
+  }
+}
+
+const users: User[] = globalThis.appData.users
+const projects: Project[] = globalThis.appData.projects
+const tasks: Task[] = globalThis.appData.tasks
 
 // User operations
 export function getUsers(): User[] {
@@ -62,7 +80,11 @@ export function deleteProject(id: number): boolean {
 
   projects.splice(projectIndex, 1)
   // Also delete all tasks associated with this project
-  tasks = tasks.filter(t => t.projectId !== id)
+  const tasksToRemove = tasks.filter(t => t.projectId === id)
+  tasksToRemove.forEach(task => {
+    const taskIndex = tasks.findIndex(t => t.id === task.id)
+    if (taskIndex !== -1) tasks.splice(taskIndex, 1)
+  })
   return true
 }
 
