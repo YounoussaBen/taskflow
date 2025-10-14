@@ -1,4 +1,4 @@
-**TaskFlow – Role-Based Task Management App**
+# TaskFlow – Role-Based Task Management App
 
 A lightweight task management app built with **Next.js 15 + TypeScript**, showcasing **Role-Based Access Control (RBAC)** with three user roles: Admin, Manager, and Member.
 Developed for the **Infusi Take-Home Assignment**.
@@ -74,7 +74,7 @@ Accessible only to Admins at `/admin`.
 Includes:
 
 - User list with role update controls
-- Optional analytics: tasks done vs. pending
+- Analytics: tasks done vs. pending
 
 ---
 
@@ -106,5 +106,4 @@ Next.js 15 • TypeScript • Tailwind CSS • Radix UI • Lucide Icons • Bun
 
 ---
 
-**Deployed on Vercel** — [https://taskflow.vercel.app](https://taskflow.vercel.app)
-**GitHub Repository** — [https://github.com/YounoussaBen/taskflow](https://github.com/YounoussaBen/taskflow)
+**Deployed on Vercel** — [https://infusitaskflow.vercel.app](https://infusitaskflow.vercel.app)
