@@ -2,6 +2,14 @@ import { User, Project, Task, Role, TaskStatus } from "./types"
 import usersData from "@/data/users.json"
 import projectsData from "@/data/projects.json"
 import tasksData from "@/data/tasks.json"
+import {
+  getFromKV,
+  setInKV,
+  USERS_KEY,
+  PROJECTS_KEY,
+  TASKS_KEY,
+  initializeKV,
+} from "./redis-store"
 
 // Using globalThis to prevent reinitialization during development
 declare global {
@@ -12,6 +20,7 @@ declare global {
         tasks: Task[]
       }
     | undefined
+  var kvInitialized: boolean | undefined
 }
 
 if (!globalThis.appData) {
@@ -22,126 +31,220 @@ if (!globalThis.appData) {
   }
 }
 
-const users: User[] = globalThis.appData.users
-const projects: Project[] = globalThis.appData.projects
-const tasks: Task[] = globalThis.appData.tasks
+// Initialize KV on first import
+if (!globalThis.kvInitialized) {
+  globalThis.kvInitialized = true
+  initializeKV().catch(() => {
+    // Silently fail if KV is not available
+  })
+}
+
+// Helper to determine if we should use Redis (production) or in-memory (development)
+const useKV = process.env.NODE_ENV === "production" && process.env.REDIS_URL
 
 // User operations
-export function getUsers(): User[] {
-  return users
+export async function getUsers(): Promise<User[]> {
+  if (useKV) {
+    return await getFromKV(USERS_KEY, globalThis.appData!.users)
+  }
+  return globalThis.appData!.users
 }
 
 export function getUserByEmail(email: string): User | undefined {
-  return users.find(u => u.email === email)
+  return globalThis.appData!.users.find(u => u.email === email)
 }
 
-export function updateUserRole(email: string, role: Role): User | null {
+// Synchronous version for client components (uses in-memory data only)
+export function getUsersSync(): User[] {
+  return globalThis.appData!.users
+}
+
+export async function updateUserRole(
+  email: string,
+  role: Role
+): Promise<User | null> {
+  const users = await getUsers()
   const userIndex = users.findIndex(u => u.email === email)
   if (userIndex === -1) return null
 
   users[userIndex] = { ...users[userIndex], role }
+
+  if (useKV) {
+    await setInKV(USERS_KEY, users)
+  } else {
+    globalThis.appData!.users = users
+  }
+
   return users[userIndex]
 }
 
 // Project operations
-export function getProjects(): Project[] {
-  return projects
+export async function getProjects(): Promise<Project[]> {
+  if (useKV) {
+    return await getFromKV(PROJECTS_KEY, globalThis.appData!.projects)
+  }
+  return globalThis.appData!.projects
 }
 
-export function getProjectById(id: number): Project | undefined {
+export async function getProjectById(id: number): Promise<Project | undefined> {
+  const projects = await getProjects()
   return projects.find(p => p.id === id)
 }
 
-export function getProjectsByOwner(ownerEmail: string): Project[] {
+export async function getProjectsByOwner(
+  ownerEmail: string
+): Promise<Project[]> {
+  const projects = await getProjects()
   return projects.filter(p => p.owner === ownerEmail)
 }
 
-export function createProject(project: Omit<Project, "id">): Project {
+export async function createProject(
+  project: Omit<Project, "id">
+): Promise<Project> {
+  const projects = await getProjects()
   const newId = Math.max(...projects.map(p => p.id), 0) + 1
   const newProject: Project = { ...project, id: newId }
   projects.push(newProject)
+
+  if (useKV) {
+    await setInKV(PROJECTS_KEY, projects)
+  } else {
+    globalThis.appData!.projects = projects
+  }
+
   return newProject
 }
 
-export function updateProject(
+export async function updateProject(
   id: number,
   updates: Partial<Omit<Project, "id">>
-): Project | null {
+): Promise<Project | null> {
+  const projects = await getProjects()
   const projectIndex = projects.findIndex(p => p.id === id)
   if (projectIndex === -1) return null
 
   projects[projectIndex] = { ...projects[projectIndex], ...updates }
+
+  if (useKV) {
+    await setInKV(PROJECTS_KEY, projects)
+  } else {
+    globalThis.appData!.projects = projects
+  }
+
   return projects[projectIndex]
 }
 
-export function deleteProject(id: number): boolean {
+export async function deleteProject(id: number): Promise<boolean> {
+  const projects = await getProjects()
+  const tasks = await getTasks()
+
   const projectIndex = projects.findIndex(p => p.id === id)
   if (projectIndex === -1) return false
 
   projects.splice(projectIndex, 1)
+
   // Also delete all tasks associated with this project
-  const tasksToRemove = tasks.filter(t => t.projectId === id)
-  tasksToRemove.forEach(task => {
-    const taskIndex = tasks.findIndex(t => t.id === task.id)
-    if (taskIndex !== -1) tasks.splice(taskIndex, 1)
-  })
+  const updatedTasks = tasks.filter(t => t.projectId !== id)
+
+  if (useKV) {
+    await setInKV(PROJECTS_KEY, projects)
+    await setInKV(TASKS_KEY, updatedTasks)
+  } else {
+    globalThis.appData!.projects = projects
+    globalThis.appData!.tasks = updatedTasks
+  }
+
   return true
 }
 
 // Task operations
-export function getTasks(): Task[] {
-  return tasks
+export async function getTasks(): Promise<Task[]> {
+  if (useKV) {
+    return await getFromKV(TASKS_KEY, globalThis.appData!.tasks)
+  }
+  return globalThis.appData!.tasks
 }
 
-export function getTaskById(id: number): Task | undefined {
+export async function getTaskById(id: number): Promise<Task | undefined> {
+  const tasks = await getTasks()
   return tasks.find(t => t.id === id)
 }
 
-export function getTasksByProject(projectId: number): Task[] {
+export async function getTasksByProject(projectId: number): Promise<Task[]> {
+  const tasks = await getTasks()
   return tasks.filter(t => t.projectId === projectId)
 }
 
-export function getTasksByAssignee(assignedTo: string): Task[] {
+export async function getTasksByAssignee(assignedTo: string): Promise<Task[]> {
+  const tasks = await getTasks()
   return tasks.filter(t => t.assignedTo === assignedTo)
 }
 
-export function createTask(task: Omit<Task, "id">): Task {
+export async function createTask(task: Omit<Task, "id">): Promise<Task> {
+  const tasks = await getTasks()
   const newId = Math.max(...tasks.map(t => t.id), 0) + 1
   const newTask: Task = { ...task, id: newId }
   tasks.push(newTask)
+
+  if (useKV) {
+    await setInKV(TASKS_KEY, tasks)
+  } else {
+    globalThis.appData!.tasks = tasks
+  }
+
   return newTask
 }
 
-export function updateTask(
+export async function updateTask(
   id: number,
   updates: Partial<Omit<Task, "id">>
-): Task | null {
+): Promise<Task | null> {
+  const tasks = await getTasks()
   const taskIndex = tasks.findIndex(t => t.id === id)
   if (taskIndex === -1) return null
 
   tasks[taskIndex] = { ...tasks[taskIndex], ...updates }
+
+  if (useKV) {
+    await setInKV(TASKS_KEY, tasks)
+  } else {
+    globalThis.appData!.tasks = tasks
+  }
+
   return tasks[taskIndex]
 }
 
-export function deleteTask(id: number): boolean {
+export async function deleteTask(id: number): Promise<boolean> {
+  const tasks = await getTasks()
   const taskIndex = tasks.findIndex(t => t.id === id)
   if (taskIndex === -1) return false
 
   tasks.splice(taskIndex, 1)
+
+  if (useKV) {
+    await setInKV(TASKS_KEY, tasks)
+  } else {
+    globalThis.appData!.tasks = tasks
+  }
+
   return true
 }
 
-export function updateTaskStatus(id: number, status: TaskStatus): Task | null {
+export async function updateTaskStatus(
+  id: number,
+  status: TaskStatus
+): Promise<Task | null> {
   return updateTask(id, { status })
 }
 
 // Analytics operations
-export function getTaskStats(): {
+export async function getTaskStats(): Promise<{
   total: number
   pending: number
   inProgress: number
   done: number
-} {
+}> {
+  const tasks = await getTasks()
   return {
     total: tasks.length,
     pending: tasks.filter(t => t.status === "pending").length,
@@ -150,13 +253,13 @@ export function getTaskStats(): {
   }
 }
 
-export function getTaskStatsByProject(projectId: number): {
+export async function getTaskStatsByProject(projectId: number): Promise<{
   total: number
   pending: number
   inProgress: number
   done: number
-} {
-  const projectTasks = getTasksByProject(projectId)
+}> {
+  const projectTasks = await getTasksByProject(projectId)
   return {
     total: projectTasks.length,
     pending: projectTasks.filter(t => t.status === "pending").length,

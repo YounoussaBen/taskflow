@@ -22,12 +22,12 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: "Invalid task ID" }, { status: 400 })
     }
 
-    const task = getTaskById(taskId)
+    const task = await getTaskById(taskId)
     if (!task) {
       return NextResponse.json({ error: "Task not found" }, { status: 404 })
     }
 
-    const project = getProjectById(task.projectId)
+    const project = await getProjectById(task.projectId)
     if (!project) {
       return NextResponse.json({ error: "Project not found" }, { status: 404 })
     }
@@ -55,7 +55,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     if (assignedTo !== undefined) updates.assignedTo = assignedTo
     if (status !== undefined) updates.status = status as TaskStatus
 
-    const updatedTask = updateTask(taskId, updates)
+    const updatedTask = await updateTask(taskId, updates)
 
     if (!updatedTask) {
       return NextResponse.json(
@@ -77,7 +77,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
   }
 }
 
-export async function DELETE(request: NextRequest, context: RouteContext) {
+export async function DELETE(_request: NextRequest, context: RouteContext) {
   try {
     const session = await requireAuth()
     const { id } = await context.params
@@ -87,12 +87,12 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: "Invalid task ID" }, { status: 400 })
     }
 
-    const task = getTaskById(taskId)
+    const task = await getTaskById(taskId)
     if (!task) {
       return NextResponse.json({ error: "Task not found" }, { status: 404 })
     }
 
-    const project = getProjectById(task.projectId)
+    const project = await getProjectById(task.projectId)
     if (!project) {
       return NextResponse.json({ error: "Project not found" }, { status: 404 })
     }
@@ -105,7 +105,7 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
       )
     }
 
-    const success = deleteTaskData(taskId)
+    const success = await deleteTaskData(taskId)
 
     if (!success) {
       return NextResponse.json(

@@ -20,6 +20,24 @@ Visit **[http://localhost:3000](http://localhost:3000)**
 
 ---
 
+### 💾 Data Persistence
+
+**Local Development:** Uses in-memory storage (data resets on restart)
+
+**Production:** Uses **Vercel Redis** for persistent data storage
+
+To set up Redis for production:
+
+1. In your Vercel dashboard, navigate to your project
+2. Go to the **Storage** tab
+3. Click **Create Database** → Select **Redis**
+4. Vercel will automatically set the `REDIS_URL` environment variable
+5. Deploy your app - CRUD operations will now persist!
+
+The app automatically detects the Redis connection and switches from in-memory to persistent storage in production.
+
+---
+
 ### 🔐 Demo Accounts
 
 | Role    | Email                                               | Password |

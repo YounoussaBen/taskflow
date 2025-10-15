@@ -13,7 +13,7 @@ export const dynamic = "force-dynamic"
 
 export default async function ProjectsPage() {
   const session = await requireAuth()
-  const allProjects = getProjects()
+  const allProjects = await getProjects()
 
   // Filter projects based on role
   let projects = allProjects
@@ -22,10 +22,15 @@ export default async function ProjectsPage() {
     projects = allProjects.filter(p => p.owner === session.email)
   } else if (session.role === "member") {
     // Members see only projects that contain tasks assigned to them
-    const myTasks = getTasksByAssignee(session.email)
+    const myTasks = await getTasksByAssignee(session.email)
     const allowedIds = new Set(myTasks.map(t => t.projectId))
     projects = allProjects.filter(p => allowedIds.has(p.id))
   }
+
+  // Fetch stats for all projects
+  const projectStats = await Promise.all(
+    projects.map(p => getTaskStatsByProject(p.id))
+  )
 
   return (
     <div className="min-h-screen bg-background">
@@ -68,8 +73,8 @@ export default async function ProjectsPage() {
           ) : (
             <div className="rounded-2xl bg-surface p-6">
               <ul className="space-y-1">
-                {projects.map(project => {
-                  const stats = getTaskStatsByProject(project.id)
+                {projects.map((project, index) => {
+                  const stats = projectStats[index]
                   return (
                     <li key={project.id}>
                       <Link

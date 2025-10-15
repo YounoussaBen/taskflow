@@ -10,8 +10,8 @@ export const dynamic = "force-dynamic"
 export default async function AdminPage() {
   // Only admins can access this page
   const session = await requireRole(["admin"])
-  const users = getUsers()
-  const taskStats = getTaskStats()
+  const users = await getUsers()
+  const taskStats = await getTaskStats()
 
   return (
     <div className="min-h-screen bg-background">

@@ -26,13 +26,13 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
     notFound()
   }
 
-  const project = getProjectById(projectId)
+  const project = await getProjectById(projectId)
   if (!project) {
     notFound()
   }
 
-  const tasks = getTasksByProject(projectId)
-  const taskStats = getTaskStatsByProject(projectId)
+  const tasks = await getTasksByProject(projectId)
+  const taskStats = await getTaskStatsByProject(projectId)
   const canManage = canManageProject(session.email, session.role, project.owner)
   const canCreate = canCreateTask(session.role, project.owner, session.email)
 

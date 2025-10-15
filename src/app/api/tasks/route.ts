@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify project exists
-    const project = getProjectById(projectId)
+    const project = await getProjectById(projectId)
     if (!project) {
       return NextResponse.json({ error: "Project not found" }, { status: 404 })
     }
@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const newTask = createTask({
+    const newTask = await createTask({
       projectId,
       title,
       assignedTo,

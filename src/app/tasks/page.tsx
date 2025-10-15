@@ -15,8 +15,8 @@ export const dynamic = "force-dynamic"
 
 export default async function TasksPage() {
   const session = await requireAuth()
-  const allTasks = getTasks()
-  const projects = getProjects()
+  const allTasks = await getTasks()
+  const projects = await getProjects()
 
   // Filter tasks based on user role
   let tasks = allTasks

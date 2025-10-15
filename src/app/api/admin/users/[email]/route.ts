@@ -30,7 +30,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     }
 
     // Update user role
-    const updatedUser = updateUserRole(decodedEmail, role as Role)
+    const updatedUser = await updateUserRole(decodedEmail, role as Role)
 
     if (!updatedUser) {
       return NextResponse.json(

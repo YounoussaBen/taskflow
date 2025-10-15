@@ -4,7 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { X } from "lucide-react"
 import { Task } from "@/lib/types"
-import { getUsers } from "@/lib/data"
+import { getUsersSync } from "@/lib/data"
 import MenuSelect from "./menu-select"
 import StatusSelect from "./status-select"
 import { useToast } from "@/lib/toast-context"
@@ -23,7 +23,7 @@ export default function EditTaskDialog({ task, onClose }: EditTaskDialogProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
 
-  const users = getUsers()
+  const users = getUsersSync()
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()

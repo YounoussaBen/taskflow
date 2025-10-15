@@ -17,12 +17,12 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: "Invalid task ID" }, { status: 400 })
     }
 
-    const task = getTaskById(taskId)
+    const task = await getTaskById(taskId)
     if (!task) {
       return NextResponse.json({ error: "Task not found" }, { status: 404 })
     }
 
-    const project = getProjectById(task.projectId)
+    const project = await getProjectById(task.projectId)
     if (!project) {
       return NextResponse.json({ error: "Project not found" }, { status: 404 })
     }
@@ -49,7 +49,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: "Invalid status" }, { status: 400 })
     }
 
-    const updatedTask = updateTaskStatus(taskId, status as TaskStatus)
+    const updatedTask = await updateTaskStatus(taskId, status as TaskStatus)
 
     if (!updatedTask) {
       return NextResponse.json(
