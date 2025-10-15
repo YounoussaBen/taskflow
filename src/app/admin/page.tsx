@@ -29,7 +29,7 @@ export default async function AdminPage() {
 
           {/* Analytics Grid */}
           <div className="mb-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded-lg border border-border bg-surface p-6">
+            <div className="rounded-2xl bg-surface p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-secondary">
@@ -41,7 +41,7 @@ export default async function AdminPage() {
               </div>
             </div>
 
-            <div className="rounded-lg border border-border bg-surface p-6">
+            <div className="rounded-2xl bg-surface p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-secondary">
@@ -53,7 +53,7 @@ export default async function AdminPage() {
               </div>
             </div>
 
-            <div className="rounded-lg border border-border bg-surface p-6">
+            <div className="rounded-2xl bg-surface p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-secondary">Pending</p>
@@ -63,7 +63,7 @@ export default async function AdminPage() {
               </div>
             </div>
 
-            <div className="rounded-lg border border-border bg-surface p-6">
+            <div className="rounded-2xl bg-surface p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-secondary">
@@ -77,7 +77,7 @@ export default async function AdminPage() {
           </div>
 
           {/* Task Progress */}
-          <div className="mb-8 rounded-lg border border-border bg-surface p-6">
+          <div className="mb-8 rounded-2xl bg-surface p-6">
             <h2 className="mb-4 text-xl font-semibold">Task Progress</h2>
             <div className="space-y-4">
               <div>
@@ -134,7 +134,7 @@ export default async function AdminPage() {
           </div>
 
           {/* User Management */}
-          <div className="rounded-lg border border-border bg-surface p-6">
+          <div className="rounded-2xl bg-surface p-6">
             <div className="mb-6 flex items-center justify-between">
               <h2 className="text-xl font-semibold">User Management</h2>
               <span className="text-sm text-secondary">
