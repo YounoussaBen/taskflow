@@ -68,7 +68,7 @@ export default function Sidebar({ session }: SidebarProps) {
   }, [])
 
   const NavLinks = () => (
-    <nav className="mt-4 space-y-1">
+    <nav className="mt-4 flex flex-1 flex-col gap-2 overflow-y-auto py-2 md:mt-6">
       {links.map(l => {
         const active = pathname === l.href
         const Icon = l.icon
@@ -77,14 +77,14 @@ export default function Sidebar({ session }: SidebarProps) {
             key={l.href}
             href={l.href}
             title={l.label}
-            className={`flex items-center ${collapsed ? "justify-center" : "gap-3"} rounded-xl px-3 py-2 text-sm font-medium transition-colors ${
+            className={`flex items-center ${collapsed ? "justify-center" : "gap-3"} rounded-xl px-3 py-2.5 text-base font-medium transition-colors ${
               active
                 ? "bg-accent text-accent-foreground"
                 : "text-foreground hover:bg-background"
             }`}
             onClick={() => setOpen(false)}
           >
-            <Icon className="h-4 w-4" />
+            <Icon className="h-5 w-5" />
             {!collapsed && <span>{l.label}</span>}
             {collapsed && <span className="sr-only">{l.label}</span>}
           </Link>
@@ -167,39 +167,43 @@ export default function Sidebar({ session }: SidebarProps) {
         <div
           className={`absolute left-0 top-0 z-10 h-full w-72 border-r border-border bg-surface px-4 py-5 transition-transform ${open ? "translate-x-0" : "-translate-x-full"}`}
         >
-          <div className="flex items-center justify-between px-2">
-            <div className="flex items-center gap-2">
-              <Image
-                src="/logo.png"
-                alt="TaskFlow"
-                width={24}
-                height={24}
-                className="h-6 w-6 rounded"
-              />
-              <span className="text-base font-semibold">TaskFlow</span>
-            </div>
-            <button
-              aria-label="Close navigation"
-              onClick={() => setOpen(false)}
-              className="inline-flex items-center justify-center rounded-full p-2 text-foreground hover:bg-background"
-            >
-              <X className="h-5 w-5" />
-            </button>
-          </div>
-          <NavLinks />
-          <div className="mt-auto space-y-3 px-2 pt-6">
-            <div className="rounded-xl bg-background p-3 text-xs text-foreground-secondary">
-              <div className="font-medium text-foreground">{session.email}</div>
-              <div className="mt-1 inline-flex rounded-full bg-accent/10 px-2 py-0.5 font-medium text-accent">
-                {session.role}
+          <div className="flex h-full flex-col">
+            <div className="flex items-center justify-between px-2">
+              <div className="flex items-center gap-2">
+                <Image
+                  src="/logo.png"
+                  alt="TaskFlow"
+                  width={24}
+                  height={24}
+                  className="h-6 w-6 rounded"
+                />
+                <span className="text-base font-semibold">TaskFlow</span>
               </div>
+              <button
+                aria-label="Close navigation"
+                onClick={() => setOpen(false)}
+                className="inline-flex items-center justify-center rounded-full p-2 text-foreground hover:bg-background"
+              >
+                <X className="h-5 w-5" />
+              </button>
             </div>
-            <button
-              onClick={handleLogout}
-              className="flex w-full items-center justify-center gap-2 rounded-full bg-accent px-4 py-2 text-sm font-medium text-accent-foreground"
-            >
-              <LogOut className="h-4 w-4" /> Logout
-            </button>
+            <NavLinks />
+            <div className="mt-auto space-y-3 px-2 pt-6">
+              <div className="rounded-xl bg-background p-3 text-xs text-foreground-secondary">
+                <div className="font-medium text-foreground">
+                  {session.email}
+                </div>
+                <div className="mt-1 inline-flex rounded-full bg-accent/10 px-2 py-0.5 font-medium text-accent">
+                  {session.role}
+                </div>
+              </div>
+              <button
+                onClick={handleLogout}
+                className="flex w-full items-center justify-center gap-2 rounded-full bg-accent px-4 py-2 text-sm font-medium text-accent-foreground"
+              >
+                <LogOut className="h-4 w-4" /> Logout
+              </button>
+            </div>
           </div>
         </div>
       </div>
