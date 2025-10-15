@@ -61,13 +61,13 @@ The app automatically detects the Redis connection and switches from in-memory t
 
 ### 👥 Role Permissions
 
-| Action                   | Admin | Manager           | Member         |
-| ------------------------ | ----- | ----------------- | -------------- |
-| View all projects        | ✅    | ✅                | ✅             |
-| Create/edit/delete tasks | ✅    | ✅ (own projects) | ❌             |
-| Mark tasks as done       | ✅    | ✅                | ✅ (own tasks) |
-| Manage user roles        | ✅    | ❌                | ❌             |
-| Access Admin Panel       | ✅    | ❌                | ❌             |
+| Action                   | Admin             | Manager           | Member                                        |
+| ------------------------ | ----------------- | ----------------- | --------------------------------------------- |
+| View projects            | ✅ (all projects) | ✅ (own projects) | ✅ (projects with at least one assigned task) |
+| Create/edit/delete tasks | ✅                | ✅ (own projects) | ❌                                            |
+| Mark tasks as done       | ✅                | ✅                | ✅ (own tasks)                                |
+| Manage user roles        | ✅                | ❌                | ❌                                            |
+| Access Admin Panel       | ✅                | ❌                | ❌                                            |
 
 ---
 
