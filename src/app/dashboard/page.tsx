@@ -39,22 +39,10 @@ export default async function DashboardPage() {
   // Get role-specific stats
   const roleStats =
     session.role === "admin"
-      ? {
-          label: "Total System Tasks",
-          value: allTasks.length,
-          icon: Target,
-        }
+      ? { label: "Total System Tasks", value: allTasks.length, icon: Target }
       : session.role === "manager"
-        ? {
-            label: "My Projects",
-            value: myProjects.length,
-            icon: Folder,
-          }
-        : {
-            label: "Tasks Assigned",
-            value: myTasks.length,
-            icon: Target,
-          }
+        ? { label: "My Projects", value: myProjects.length, icon: Folder }
+        : { label: "Tasks Assigned", value: myTasks.length, icon: Target }
 
   return (
     <div className="min-h-screen bg-background">
@@ -80,7 +68,10 @@ export default async function DashboardPage() {
                   </p>
                   <p className="mt-2 text-3xl font-bold">{roleStats.value}</p>
                 </div>
-                <roleStats.icon className="h-8 w-8 text-accent" />
+                {(() => {
+                  const Icon = roleStats.icon
+                  return <Icon className="h-8 w-8 text-accent" />
+                })()}
               </div>
             </div>
 
@@ -108,7 +99,7 @@ export default async function DashboardPage() {
                     {myInProgressTasks.length}
                   </p>
                 </div>
-                <Clock className="h-8 w-8 text-blue-500" />
+                <Target className="h-8 w-8 text-blue-500" />
               </div>
             </div>
 
@@ -251,20 +242,31 @@ export default async function DashboardPage() {
               {projects.length === 0 ? (
                 <p className="text-secondary">No projects yet.</p>
               ) : (
-                <div className="space-y-3">
+                <ul className="space-y-1">
                   {projects.map(project => (
-                    <Link
-                      key={project.id}
-                      href={`/projects/${project.id}`}
-                      className="block rounded-xl border border-border bg-background p-4 transition-colors hover:border-accent"
-                    >
-                      <h3 className="font-medium">{project.name}</h3>
-                      <p className="mt-1 text-sm text-secondary">
-                        {project.description}
-                      </p>
-                    </Link>
+                    <li key={project.id}>
+                      <Link
+                        href={`/projects/${project.id}`}
+                        className="group flex items-start justify-between rounded-lg p-3 transition-colors hover:bg-background focus:outline-none focus:ring-2 focus:ring-accent/40"
+                      >
+                        <div className="flex gap-3">
+                          <div className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-md bg-accent/10">
+                            <Folder className="h-4 w-4 text-accent" />
+                          </div>
+                          <div>
+                            <h3 className="font-medium group-hover:text-accent">
+                              {project.name}
+                            </h3>
+                            <p className="mt-1 line-clamp-2 text-sm text-secondary">
+                              {project.description}
+                            </p>
+                          </div>
+                        </div>
+                        <ArrowRight className="mt-1 h-4 w-4 text-secondary transition-transform group-hover:translate-x-0.5 group-hover:text-accent" />
+                      </Link>
+                    </li>
                   ))}
-                </div>
+                </ul>
               )}
             </div>
 
@@ -284,49 +286,80 @@ export default async function DashboardPage() {
               {myTasks.length === 0 ? (
                 <p className="text-secondary">No tasks assigned to you.</p>
               ) : (
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="mb-2 text-sm font-medium text-secondary">
-                      Pending ({myPendingTasks.length})
-                    </h3>
-                    {myPendingTasks.slice(0, 2).map(task => (
-                      <div
-                        key={task.id}
-                        className="mb-2 rounded-xl border border-border bg-background p-3"
-                      >
-                        <p className="text-sm">{task.title}</p>
-                      </div>
-                    ))}
-                  </div>
+                (() => {
+                  const order: Record<string, number> = {
+                    in_progress: 0,
+                    pending: 1,
+                    done: 2,
+                  }
+                  const myTasksSorted = [...myTasks].sort(
+                    (a, b) => order[a.status] - order[b.status]
+                  )
+                  return (
+                    <ul className="space-y-1">
+                      {myTasksSorted.slice(0, 6).map(task => {
+                        const projectName =
+                          projects.find(p => p.id === task.projectId)?.name ||
+                          "Project"
+                        const meta =
+                          task.status === "pending"
+                            ? {
+                                label: "Pending",
+                                chipClass: "bg-yellow-500/10 text-yellow-700",
+                                Icon: Clock,
+                                iconWrapClass: "bg-yellow-500/10",
+                                iconClass: "text-yellow-500",
+                              }
+                            : task.status === "in_progress"
+                              ? {
+                                  label: "In progress",
+                                  chipClass: "bg-blue-500/10 text-blue-700",
+                                  Icon: Target,
+                                  iconWrapClass: "bg-blue-500/10",
+                                  iconClass: "text-blue-500",
+                                }
+                              : {
+                                  label: "Done",
+                                  chipClass: "bg-green-500/10 text-green-700",
+                                  Icon: CheckCircle2,
+                                  iconWrapClass: "bg-green-500/10",
+                                  iconClass: "text-green-500",
+                                }
 
-                  <div>
-                    <h3 className="mb-2 text-sm font-medium text-secondary">
-                      In Progress ({myInProgressTasks.length})
-                    </h3>
-                    {myInProgressTasks.slice(0, 2).map(task => (
-                      <div
-                        key={task.id}
-                        className="mb-2 rounded-xl border border-border bg-background p-3"
-                      >
-                        <p className="text-sm">{task.title}</p>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div>
-                    <h3 className="mb-2 text-sm font-medium text-secondary">
-                      Done ({myDoneTasks.length})
-                    </h3>
-                    {myDoneTasks.slice(0, 2).map(task => (
-                      <div
-                        key={task.id}
-                        className="mb-2 rounded-xl border border-border bg-background p-3"
-                      >
-                        <p className="text-sm">{task.title}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                        const StatusIcon = meta.Icon
+                        return (
+                          <li key={task.id}>
+                            <div className="flex items-start justify-between rounded-lg p-3 transition-colors hover:bg-background">
+                              <div className="flex gap-3">
+                                <div
+                                  className={`mt-0.5 flex h-8 w-8 items-center justify-center rounded-md ${meta.iconWrapClass}`}
+                                >
+                                  <StatusIcon
+                                    className={`h-4 w-4 ${meta.iconClass}`}
+                                  />
+                                </div>
+                                <div>
+                                  <p className="text-sm font-medium">
+                                    {task.title}
+                                  </p>
+                                  <p className="text-xs text-secondary">
+                                    {projectName}
+                                  </p>
+                                </div>
+                              </div>
+                              <span
+                                className={`ml-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${meta.chipClass}`}
+                              >
+                                <StatusIcon className="h-3 w-3" />
+                                {meta.label}
+                              </span>
+                            </div>
+                          </li>
+                        )
+                      })}
+                    </ul>
+                  )
+                })()
               )}
             </div>
           </div>
