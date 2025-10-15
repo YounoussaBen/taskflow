@@ -1,6 +1,7 @@
 import { requireAuth } from "@/lib/auth"
 import { getTasks, getProjects } from "@/lib/data"
-import Navbar from "@/components/navbar"
+import Sidebar from "@/components/sidebar"
+import TopbarMobile from "@/components/topbar-mobile"
 import Link from "next/link"
 import { Clock, CheckCircle2, AlertCircle } from "lucide-react"
 
@@ -58,99 +59,102 @@ export default async function TasksPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar session={session} />
+      <div className="min-h-dvh md:flex">
+        <Sidebar session={session} />
 
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold">Tasks</h1>
-          <p className="mt-2 text-secondary">
-            {session.role === "member"
-              ? "View and manage your assigned tasks"
-              : session.role === "manager"
-                ? "Manage tasks in your projects"
-                : "View and manage all tasks"}
-          </p>
-        </div>
-
-        {tasks.length === 0 ? (
-          <div className="rounded-lg border border-border bg-surface p-12 text-center">
-            <AlertCircle className="mx-auto h-12 w-12 text-secondary" />
-            <h3 className="mt-4 text-lg font-semibold">No tasks found</h3>
+        <main className="min-w-0 flex-1 px-4 py-4 sm:px-6 lg:px-8">
+          <TopbarMobile />
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold">Tasks</h1>
             <p className="mt-2 text-secondary">
               {session.role === "member"
-                ? "You don't have any tasks assigned to you yet."
-                : "No tasks available. Create a task in a project to get started."}
+                ? "View and manage your assigned tasks"
+                : session.role === "manager"
+                  ? "Manage tasks in your projects"
+                  : "View and manage all tasks"}
             </p>
           </div>
-        ) : (
-          <div className="rounded-lg border border-border bg-surface">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="border-b border-border bg-background">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-sm font-semibold">
-                      Task
-                    </th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold">
-                      Project
-                    </th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold">
-                      Assigned To
-                    </th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold">
-                      Status
-                    </th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {tasks.map(task => (
-                    <tr
-                      key={task.id}
-                      className="transition-colors hover:bg-background/50"
-                    >
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          {getStatusIcon(task.status)}
-                          <span className="font-medium">{task.title}</span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-secondary">
-                        <Link
-                          href={`/projects/${task.projectId}`}
-                          className="hover:text-accent hover:underline"
-                        >
-                          {getProjectName(task.projectId)}
-                        </Link>
-                      </td>
-                      <td className="px-6 py-4 text-secondary">
-                        {task.assignedTo}
-                      </td>
-                      <td className="px-6 py-4">
-                        <span
-                          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getStatusColor(task.status)}`}
-                        >
-                          {task.status.replace("_", " ")}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <Link
-                          href={`/projects/${task.projectId}`}
-                          className="text-sm font-medium text-accent hover:underline"
-                        >
-                          View
-                        </Link>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+
+          {tasks.length === 0 ? (
+            <div className="rounded-lg border border-border bg-surface p-12 text-center">
+              <AlertCircle className="mx-auto h-12 w-12 text-secondary" />
+              <h3 className="mt-4 text-lg font-semibold">No tasks found</h3>
+              <p className="mt-2 text-secondary">
+                {session.role === "member"
+                  ? "You don't have any tasks assigned to you yet."
+                  : "No tasks available. Create a task in a project to get started."}
+              </p>
             </div>
-          </div>
-        )}
-      </main>
+          ) : (
+            <div className="rounded-lg border border-border bg-surface">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="border-b border-border bg-background">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-sm font-semibold">
+                        Task
+                      </th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold">
+                        Project
+                      </th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold">
+                        Assigned To
+                      </th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold">
+                        Status
+                      </th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border">
+                    {tasks.map(task => (
+                      <tr
+                        key={task.id}
+                        className="transition-colors hover:bg-background/50"
+                      >
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            {getStatusIcon(task.status)}
+                            <span className="font-medium">{task.title}</span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-secondary">
+                          <Link
+                            href={`/projects/${task.projectId}`}
+                            className="hover:text-accent hover:underline"
+                          >
+                            {getProjectName(task.projectId)}
+                          </Link>
+                        </td>
+                        <td className="px-6 py-4 text-secondary">
+                          {task.assignedTo}
+                        </td>
+                        <td className="px-6 py-4">
+                          <span
+                            className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getStatusColor(task.status)}`}
+                          >
+                            {task.status.replace("_", " ")}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <Link
+                            href={`/projects/${task.projectId}`}
+                            className="text-sm font-medium text-accent hover:underline"
+                          >
+                            View
+                          </Link>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </main>
+      </div>
     </div>
   )
 }
