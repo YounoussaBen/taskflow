@@ -83,78 +83,79 @@ export default function TaskList({
 
   return (
     <>
-      <div className="space-y-3">
+      <ul className="space-y-1">
         {tasks.map(task => (
-          <div
-            key={task.id}
-            className="flex items-center justify-between rounded-lg border border-border bg-background p-4 transition-colors hover:border-accent/50"
-          >
-            <div className="flex flex-1 items-center gap-4">
-              {getStatusIcon(task.status)}
-              <div className="flex-1">
-                <h3 className="font-medium">{task.title}</h3>
-                <p className="text-sm text-secondary">
-                  Assigned to: {task.assignedTo}
-                </p>
+          <li key={task.id}>
+            <div className="group flex items-center justify-between rounded-lg p-3 transition-colors hover:bg-background">
+              <div className="flex flex-1 items-center gap-3">
+                {getStatusIcon(task.status)}
+                <div className="flex-1">
+                  <h3 className="text-sm font-medium group-hover:text-accent">
+                    {task.title}
+                  </h3>
+                  <p className="text-xs text-secondary">
+                    Assigned to: {task.assignedTo}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                {canUpdateStatus(task) && (
+                  <TaskStatusSelector task={task} projectOwner={projectOwner} />
+                )}
+
+                {(canEdit() || canDelete()) && (
+                  <div className="relative">
+                    <button
+                      onClick={() =>
+                        setOpenMenuId(openMenuId === task.id ? null : task.id)
+                      }
+                      className="rounded-md p-2 text-secondary transition-colors hover:bg-surface hover:text-foreground focus:outline-none focus:ring-2 focus:ring-accent/30"
+                    >
+                      <MoreVertical className="h-5 w-5" />
+                    </button>
+
+                    {openMenuId === task.id && (
+                      <>
+                        <div
+                          className="fixed inset-0 z-10"
+                          onClick={() => setOpenMenuId(null)}
+                        />
+                        <div className="absolute right-0 top-full z-20 mt-1 w-48 rounded-lg border border-border bg-surface shadow-lg">
+                          {canEdit() && (
+                            <button
+                              onClick={() => {
+                                setEditingTask(task)
+                                setOpenMenuId(null)
+                              }}
+                              className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm transition-colors hover:bg-background"
+                            >
+                              <Edit className="h-4 w-4" />
+                              Edit Task
+                            </button>
+                          )}
+                          {canDelete() && (
+                            <button
+                              onClick={() => {
+                                setDeletingTask(task)
+                                setOpenMenuId(null)
+                              }}
+                              className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-destructive transition-colors hover:bg-background"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                              Delete Task
+                            </button>
+                          )}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
-
-            <div className="flex items-center gap-3">
-              {canUpdateStatus(task) && (
-                <TaskStatusSelector task={task} projectOwner={projectOwner} />
-              )}
-
-              {(canEdit() || canDelete()) && (
-                <div className="relative">
-                  <button
-                    onClick={() =>
-                      setOpenMenuId(openMenuId === task.id ? null : task.id)
-                    }
-                    className="rounded-md p-2 text-secondary transition-colors hover:bg-surface hover:text-foreground"
-                  >
-                    <MoreVertical className="h-5 w-5" />
-                  </button>
-
-                  {openMenuId === task.id && (
-                    <>
-                      <div
-                        className="fixed inset-0 z-10"
-                        onClick={() => setOpenMenuId(null)}
-                      />
-                      <div className="absolute right-0 top-full z-20 mt-1 w-48 rounded-lg border border-border bg-surface shadow-lg">
-                        {canEdit() && (
-                          <button
-                            onClick={() => {
-                              setEditingTask(task)
-                              setOpenMenuId(null)
-                            }}
-                            className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm transition-colors hover:bg-background"
-                          >
-                            <Edit className="h-4 w-4" />
-                            Edit Task
-                          </button>
-                        )}
-                        {canDelete() && (
-                          <button
-                            onClick={() => {
-                              setDeletingTask(task)
-                              setOpenMenuId(null)
-                            }}
-                            className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-destructive transition-colors hover:bg-background"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                            Delete Task
-                          </button>
-                        )}
-                      </div>
-                    </>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
+          </li>
         ))}
-      </div>
+      </ul>
 
       {editingTask && (
         <EditTaskDialog

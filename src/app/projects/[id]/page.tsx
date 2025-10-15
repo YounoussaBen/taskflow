@@ -1,5 +1,9 @@
 import { requireAuth, canManageProject, canCreateTask } from "@/lib/auth"
-import { getProjectById, getTasksByProject } from "@/lib/data"
+import {
+  getProjectById,
+  getTasksByProject,
+  getTaskStatsByProject,
+} from "@/lib/data"
 import Sidebar from "@/components/sidebar"
 import TopbarMobile from "@/components/topbar-mobile"
 import { notFound } from "next/navigation"
@@ -28,6 +32,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
   }
 
   const tasks = getTasksByProject(projectId)
+  const taskStats = getTaskStatsByProject(projectId)
   const canManage = canManageProject(session.email, session.role, project.owner)
   const canCreate = canCreateTask(session.role, project.owner, session.email)
 
@@ -39,8 +44,8 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
         <main className="min-w-0 flex-1 px-4 py-4 sm:px-6 lg:px-8">
           <TopbarMobile />
           {/* Project Header */}
-          <div className="mb-8 rounded-lg border border-border bg-surface p-6">
-            <div className="flex items-start justify-between">
+          <div className="mb-8 rounded-2xl bg-surface p-6">
+            <div className="flex items-start justify-between gap-4">
               <div className="flex gap-4">
                 <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-accent/10">
                   <Folder className="h-8 w-8 text-accent" />
@@ -48,9 +53,19 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                 <div>
                   <h1 className="text-3xl font-bold">{project.name}</h1>
                   <p className="mt-2 text-secondary">{project.description}</p>
-                  <div className="mt-3 flex items-center gap-2 text-sm text-secondary">
-                    <User className="h-4 w-4" />
-                    <span>Owner: {project.owner}</span>
+                  <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-secondary">
+                    <span className="inline-flex items-center gap-2">
+                      <User className="h-4 w-4" /> Owner: {project.owner}
+                    </span>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-yellow-500/10 px-2 py-0.5 font-medium text-yellow-700">
+                      Pending {taskStats.pending}
+                    </span>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/10 px-2 py-0.5 font-medium text-blue-700">
+                      In progress {taskStats.inProgress}
+                    </span>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-green-500/10 px-2 py-0.5 font-medium text-green-700">
+                      Done {taskStats.done}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -60,7 +75,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           </div>
 
           {/* Tasks Section */}
-          <div className="rounded-lg border border-border bg-surface p-6">
+          <div className="rounded-2xl bg-surface p-6">
             <div className="mb-6 flex items-center justify-between">
               <h2 className="text-xl font-semibold">Tasks</h2>
               <span className="text-sm text-secondary">

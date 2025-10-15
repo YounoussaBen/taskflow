@@ -46,7 +46,7 @@ export default function DeleteTaskDialog({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-md rounded-lg bg-surface p-6 shadow-xl">
+      <div className="w-full max-w-md rounded-2xl bg-surface p-6 shadow-xl">
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <AlertTriangle className="h-6 w-6 text-destructive" />
@@ -54,7 +54,7 @@ export default function DeleteTaskDialog({
           </div>
           <button
             onClick={onClose}
-            className="rounded-md p-1 text-secondary transition-colors hover:bg-background hover:text-foreground"
+            className="rounded-md p-1 text-secondary transition-colors hover:bg-background hover:text-foreground focus:outline-none focus:ring-2 focus:ring-accent/30"
           >
             <X className="h-5 w-5" />
           </button>
@@ -84,7 +84,7 @@ export default function DeleteTaskDialog({
             type="button"
             onClick={onClose}
             disabled={isLoading}
-            className="flex-1 rounded-lg border border-border px-4 py-2 font-medium transition-colors hover:bg-background disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex-1 rounded-lg border border-border px-4 py-2 font-medium transition-colors hover:bg-background focus:outline-none focus:ring-2 focus:ring-accent/30 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Cancel
           </button>
@@ -92,7 +92,7 @@ export default function DeleteTaskDialog({
             type="button"
             onClick={handleDelete}
             disabled={isLoading}
-            className="flex-1 rounded-lg bg-destructive px-4 py-2 font-medium text-destructive-foreground transition-colors hover:bg-destructive/90 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex-1 rounded-lg bg-destructive px-4 py-2 font-medium text-destructive-foreground transition-colors hover:bg-destructive/90 focus:outline-none focus:ring-2 focus:ring-destructive/30 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isLoading ? "Deleting..." : "Delete Task"}
           </button>

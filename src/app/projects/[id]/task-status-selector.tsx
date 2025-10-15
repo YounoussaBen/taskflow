@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Task, TaskStatus } from "@/lib/types"
+import StatusSelect from "./status-select"
 
 interface TaskStatusSelectorProps {
   task: Task
@@ -39,29 +40,26 @@ export default function TaskStatusSelector({ task }: TaskStatusSelectorProps) {
     }
   }
 
-  const getStatusColor = (status: string) => {
+  const getStatusClasses = (status: string) => {
     switch (status) {
       case "done":
-        return "bg-green-100 text-green-800 border-green-200"
+        return "bg-green-500/10 text-green-700"
       case "in_progress":
-        return "bg-blue-100 text-blue-800 border-blue-200"
+        return "bg-blue-500/10 text-blue-700"
       case "pending":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200"
+        return "bg-yellow-500/10 text-yellow-700"
       default:
-        return "bg-gray-100 text-gray-800 border-gray-200"
+        return "bg-foreground/5 text-foreground"
     }
   }
 
   return (
-    <select
-      value={task.status}
-      onChange={e => handleStatusChange(e.target.value as TaskStatus)}
-      disabled={isLoading}
-      className={`rounded-lg border px-3 py-1 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-accent/20 disabled:cursor-not-allowed disabled:opacity-50 ${getStatusColor(task.status)}`}
-    >
-      <option value="pending">Pending</option>
-      <option value="in_progress">In Progress</option>
-      <option value="done">Done</option>
-    </select>
+    <div className={`rounded-full ${getStatusClasses(task.status)}`}>
+      <StatusSelect
+        value={task.status}
+        onChange={v => handleStatusChange(v as TaskStatus)}
+        disabled={isLoading}
+      />
+    </div>
   )
 }

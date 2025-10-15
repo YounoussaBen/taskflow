@@ -4,6 +4,8 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { X } from "lucide-react"
 import { getUsers } from "@/lib/data"
+import MenuSelect from "./menu-select"
+import StatusSelect from "./status-select"
 
 interface CreateTaskDialogProps {
   projectId: number
@@ -61,12 +63,12 @@ export default function CreateTaskDialog({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-md rounded-lg bg-surface p-6 shadow-xl">
+      <div className="w-full max-w-md rounded-2xl bg-surface p-6 shadow-xl">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-xl font-semibold">Create New Task</h2>
           <button
             onClick={onClose}
-            className="rounded-md p-1 text-secondary transition-colors hover:bg-background hover:text-foreground"
+            className="rounded-md p-1 text-secondary transition-colors hover:bg-background hover:text-foreground focus:outline-none focus:ring-2 focus:ring-accent/30"
           >
             <X className="h-5 w-5" />
           </button>
@@ -92,7 +94,7 @@ export default function CreateTaskDialog({
               required
               value={title}
               onChange={e => setTitle(e.target.value)}
-              className="mt-1 block w-full rounded-lg border border-border bg-background px-4 py-2 text-foreground focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+              className="mt-1 block w-full rounded-lg border border-border bg-background px-4 py-2 text-foreground focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
               placeholder="Enter task title"
             />
           </div>
@@ -104,20 +106,24 @@ export default function CreateTaskDialog({
             >
               Assign To
             </label>
-            <select
-              id="assignedTo"
-              required
-              value={assignedTo}
-              onChange={e => setAssignedTo(e.target.value)}
-              className="mt-1 block w-full rounded-lg border border-border bg-background px-4 py-2 text-foreground focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
-            >
-              <option value="">Select a user</option>
-              {users.map(user => (
-                <option key={user.email} value={user.email}>
-                  {user.email} ({user.role})
-                </option>
-              ))}
-            </select>
+            <div className="mt-1">
+              <MenuSelect
+                value={assignedTo}
+                onChange={setAssignedTo}
+                options={[
+                  {
+                    value: "",
+                    label: (
+                      <span className="text-secondary">Select a user</span>
+                    ),
+                  },
+                  ...users.map(u => ({
+                    value: u.email,
+                    label: `${u.email} (${u.role})`,
+                  })),
+                ]}
+              />
+            </div>
           </div>
 
           <div>
@@ -127,33 +133,23 @@ export default function CreateTaskDialog({
             >
               Status
             </label>
-            <select
-              id="status"
-              required
-              value={status}
-              onChange={e =>
-                setStatus(e.target.value as "pending" | "in_progress" | "done")
-              }
-              className="mt-1 block w-full rounded-lg border border-border bg-background px-4 py-2 text-foreground focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
-            >
-              <option value="pending">Pending</option>
-              <option value="in_progress">In Progress</option>
-              <option value="done">Done</option>
-            </select>
+            <div className="mt-1">
+              <StatusSelect value={status} onChange={setStatus} />
+            </div>
           </div>
 
           <div className="flex gap-3 pt-4">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 rounded-lg border border-border px-4 py-2 font-medium transition-colors hover:bg-background"
+              className="flex-1 rounded-lg border border-border px-4 py-2 font-medium transition-colors hover:bg-background focus:outline-none focus:ring-2 focus:ring-accent/30"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isLoading}
-              className="flex-1 rounded-lg bg-accent px-4 py-2 font-medium text-accent-foreground transition-colors hover:bg-accent/90 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex-1 rounded-lg bg-accent px-4 py-2 font-medium text-accent-foreground transition-colors hover:bg-accent/90 focus:outline-none focus:ring-2 focus:ring-accent/30 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isLoading ? "Creating..." : "Create Task"}
             </button>
