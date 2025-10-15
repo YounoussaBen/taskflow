@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { X } from "lucide-react"
-import { getUsersSync } from "@/lib/data"
+import { getUsersSync } from "@/lib/data-client"
 import MenuSelect from "./menu-select"
 import StatusSelect from "./status-select"
 import { useToast } from "@/lib/toast-context"

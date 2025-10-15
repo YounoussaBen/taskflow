@@ -3,12 +3,12 @@ import usersData from "@/data/users.json"
 import projectsData from "@/data/projects.json"
 import tasksData from "@/data/tasks.json"
 import {
-  getFromKV,
-  setInKV,
+  getFromRedis,
+  setInRedis,
   USERS_KEY,
   PROJECTS_KEY,
   TASKS_KEY,
-  initializeKV,
+  initializeRedis,
 } from "./redis-store"
 
 // Using globalThis to prevent reinitialization during development
@@ -20,7 +20,7 @@ declare global {
         tasks: Task[]
       }
     | undefined
-  var kvInitialized: boolean | undefined
+  var redisInitialized: boolean | undefined
 }
 
 if (!globalThis.appData) {
@@ -31,32 +31,27 @@ if (!globalThis.appData) {
   }
 }
 
-// Initialize KV on first import
-if (!globalThis.kvInitialized) {
-  globalThis.kvInitialized = true
-  initializeKV().catch(() => {
-    // Silently fail if KV is not available
+// Initialize Redis on first import
+if (!globalThis.redisInitialized) {
+  globalThis.redisInitialized = true
+  initializeRedis().catch(() => {
+    // Silently fail if Redis is not available
   })
 }
 
 // Helper to determine if we should use Redis (production) or in-memory (development)
-const useKV = process.env.NODE_ENV === "production" && process.env.REDIS_URL
+const useRedis = process.env.NODE_ENV === "production" && process.env.REDIS_URL
 
 // User operations
 export async function getUsers(): Promise<User[]> {
-  if (useKV) {
-    return await getFromKV(USERS_KEY, globalThis.appData!.users)
+  if (useRedis) {
+    return await getFromRedis(USERS_KEY, globalThis.appData!.users)
   }
   return globalThis.appData!.users
 }
 
 export function getUserByEmail(email: string): User | undefined {
   return globalThis.appData!.users.find(u => u.email === email)
-}
-
-// Synchronous version for client components (uses in-memory data only)
-export function getUsersSync(): User[] {
-  return globalThis.appData!.users
 }
 
 export async function updateUserRole(
@@ -69,8 +64,8 @@ export async function updateUserRole(
 
   users[userIndex] = { ...users[userIndex], role }
 
-  if (useKV) {
-    await setInKV(USERS_KEY, users)
+  if (useRedis) {
+    await setInRedis(USERS_KEY, users)
   } else {
     globalThis.appData!.users = users
   }
@@ -80,8 +75,8 @@ export async function updateUserRole(
 
 // Project operations
 export async function getProjects(): Promise<Project[]> {
-  if (useKV) {
-    return await getFromKV(PROJECTS_KEY, globalThis.appData!.projects)
+  if (useRedis) {
+    return await getFromRedis(PROJECTS_KEY, globalThis.appData!.projects)
   }
   return globalThis.appData!.projects
 }
@@ -106,8 +101,8 @@ export async function createProject(
   const newProject: Project = { ...project, id: newId }
   projects.push(newProject)
 
-  if (useKV) {
-    await setInKV(PROJECTS_KEY, projects)
+  if (useRedis) {
+    await setInRedis(PROJECTS_KEY, projects)
   } else {
     globalThis.appData!.projects = projects
   }
@@ -125,8 +120,8 @@ export async function updateProject(
 
   projects[projectIndex] = { ...projects[projectIndex], ...updates }
 
-  if (useKV) {
-    await setInKV(PROJECTS_KEY, projects)
+  if (useRedis) {
+    await setInRedis(PROJECTS_KEY, projects)
   } else {
     globalThis.appData!.projects = projects
   }
@@ -146,9 +141,9 @@ export async function deleteProject(id: number): Promise<boolean> {
   // Also delete all tasks associated with this project
   const updatedTasks = tasks.filter(t => t.projectId !== id)
 
-  if (useKV) {
-    await setInKV(PROJECTS_KEY, projects)
-    await setInKV(TASKS_KEY, updatedTasks)
+  if (useRedis) {
+    await setInRedis(PROJECTS_KEY, projects)
+    await setInRedis(TASKS_KEY, updatedTasks)
   } else {
     globalThis.appData!.projects = projects
     globalThis.appData!.tasks = updatedTasks
@@ -159,8 +154,8 @@ export async function deleteProject(id: number): Promise<boolean> {
 
 // Task operations
 export async function getTasks(): Promise<Task[]> {
-  if (useKV) {
-    return await getFromKV(TASKS_KEY, globalThis.appData!.tasks)
+  if (useRedis) {
+    return await getFromRedis(TASKS_KEY, globalThis.appData!.tasks)
   }
   return globalThis.appData!.tasks
 }
@@ -186,8 +181,8 @@ export async function createTask(task: Omit<Task, "id">): Promise<Task> {
   const newTask: Task = { ...task, id: newId }
   tasks.push(newTask)
 
-  if (useKV) {
-    await setInKV(TASKS_KEY, tasks)
+  if (useRedis) {
+    await setInRedis(TASKS_KEY, tasks)
   } else {
     globalThis.appData!.tasks = tasks
   }
@@ -205,8 +200,8 @@ export async function updateTask(
 
   tasks[taskIndex] = { ...tasks[taskIndex], ...updates }
 
-  if (useKV) {
-    await setInKV(TASKS_KEY, tasks)
+  if (useRedis) {
+    await setInRedis(TASKS_KEY, tasks)
   } else {
     globalThis.appData!.tasks = tasks
   }
@@ -221,8 +216,8 @@ export async function deleteTask(id: number): Promise<boolean> {
 
   tasks.splice(taskIndex, 1)
 
-  if (useKV) {
-    await setInKV(TASKS_KEY, tasks)
+  if (useRedis) {
+    await setInRedis(TASKS_KEY, tasks)
   } else {
     globalThis.appData!.tasks = tasks
   }

@@ -1,4 +1,6 @@
-import { Redis } from "@upstash/redis"
+import "server-only"
+import { createClient } from "redis"
+import type { RedisClientType } from "redis"
 import usersData from "@/data/users.json"
 import projectsData from "@/data/projects.json"
 import tasksData from "@/data/tasks.json"
@@ -7,65 +9,72 @@ const USERS_KEY = "taskflow:users"
 const PROJECTS_KEY = "taskflow:projects"
 const TASKS_KEY = "taskflow:tasks"
 
-// Initialize Redis client - parse REDIS_URL from Vercel or use Upstash env vars
-function getRedisClient() {
-  // Try Upstash environment variables first
-  if (
-    process.env.UPSTASH_REDIS_REST_URL &&
-    process.env.UPSTASH_REDIS_REST_TOKEN
-  ) {
-    return Redis.fromEnv()
+// Singleton Redis client for serverless environments
+let redis: RedisClientType | null = null
+let isConnecting = false
+
+async function getRedisClient(): Promise<RedisClientType | null> {
+  // Return null if no Redis URL configured (local development)
+  if (!process.env.REDIS_URL) {
+    return null
   }
 
-  // Parse Vercel REDIS_URL
-  if (process.env.REDIS_URL) {
-    const url = new URL(process.env.REDIS_URL)
-    const token = url.password
-    const restUrl = `https://${url.hostname}`
+  // Return existing client if already connected
+  if (redis?.isOpen) {
+    return redis
+  }
 
-    return new Redis({
-      url: restUrl,
-      token: token,
+  // Wait if connection is in progress
+  if (isConnecting) {
+    await new Promise(resolve => setTimeout(resolve, 100))
+    return getRedisClient()
+  }
+
+  try {
+    isConnecting = true
+    redis = createClient({ url: process.env.REDIS_URL })
+
+    redis.on("error", err => {
+      console.error("Redis Client Error:", err)
     })
+
+    await redis.connect()
+    isConnecting = false
+    return redis
+  } catch (error) {
+    console.error("Failed to connect to Redis:", error)
+    isConnecting = false
+    return null
   }
-
-  // Return a dummy client if no Redis is configured (local development)
-  throw new Error("No Redis configuration found")
-}
-
-let redis: Redis | null
-try {
-  redis = getRedisClient()
-} catch {
-  // Redis not available in local development
-  redis = null
 }
 
 // Initialize Redis with seed data if not exists
-export async function initializeKV() {
-  if (!redis) return
+export async function initializeRedis() {
+  const client = await getRedisClient()
+  if (!client) return
 
   try {
-    const usersExist = await redis.exists(USERS_KEY)
+    const usersExist = await client.exists(USERS_KEY)
     if (!usersExist) {
-      await redis.set(USERS_KEY, usersData)
-      await redis.set(PROJECTS_KEY, projectsData)
-      await redis.set(TASKS_KEY, tasksData)
+      await client.set(USERS_KEY, JSON.stringify(usersData))
+      await client.set(PROJECTS_KEY, JSON.stringify(projectsData))
+      await client.set(TASKS_KEY, JSON.stringify(tasksData))
     }
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     // If Redis is not available (e.g., local development without Redis setup),
     // silently fail and fallback to in-memory storage
-    console.log("KV not available, using in-memory storage")
+    console.log("Redis not available, using in-memory storage")
   }
 }
 
 // Helper to check if Redis is available
-export async function isKVAvailable(): Promise<boolean> {
-  if (!redis) return false
+export async function isRedisAvailable(): Promise<boolean> {
+  const client = await getRedisClient()
+  if (!client) return false
 
   try {
-    await redis.ping()
+    await client.ping()
     return true
   } catch {
     return false
@@ -73,24 +82,27 @@ export async function isKVAvailable(): Promise<boolean> {
 }
 
 // Redis operations
-export async function getFromKV<T>(key: string, fallback: T): Promise<T> {
-  if (!redis) return fallback
+export async function getFromRedis<T>(key: string, fallback: T): Promise<T> {
+  const client = await getRedisClient()
+  if (!client) return fallback
 
   try {
-    const data = await redis.get<T>(key)
-    return data || fallback
+    const data = await client.get(key)
+    if (!data) return fallback
+    return JSON.parse(data) as T
   } catch {
     return fallback
   }
 }
 
-export async function setInKV<T>(key: string, value: T): Promise<void> {
-  if (!redis) return
+export async function setInRedis<T>(key: string, value: T): Promise<void> {
+  const client = await getRedisClient()
+  if (!client) return
 
   try {
-    await redis.set(key, value)
+    await client.set(key, JSON.stringify(value))
   } catch (error) {
-    console.error("Failed to set in KV:", error)
+    console.error("Failed to set in Redis:", error)
   }
 }
 
