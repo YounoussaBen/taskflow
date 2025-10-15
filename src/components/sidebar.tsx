@@ -15,6 +15,7 @@ import {
   ChevronsRight,
 } from "lucide-react"
 import { useEffect, useState, type ComponentType } from "react"
+import { useToast } from "@/lib/toast-context"
 
 interface SidebarProps {
   session: Session
@@ -24,6 +25,7 @@ export default function Sidebar({ session }: SidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
   const [open, setOpen] = useState(false)
+  const { success, error } = useToast()
 
   type LinkItem = {
     href: string
@@ -43,10 +45,14 @@ export default function Sidebar({ session }: SidebarProps) {
   async function handleLogout() {
     try {
       await fetch("/api/auth/logout", { method: "POST" })
-      router.push("/login")
-      router.refresh()
+      success("Logged out successfully")
+      setTimeout(() => {
+        router.push("/login")
+        router.refresh()
+      }, 500)
     } catch (e) {
       console.error("Logout error", e)
+      error("Failed to logout. Please try again.")
     }
   }
 

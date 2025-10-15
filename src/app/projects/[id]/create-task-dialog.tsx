@@ -6,6 +6,7 @@ import { X } from "lucide-react"
 import { getUsers } from "@/lib/data"
 import MenuSelect from "./menu-select"
 import StatusSelect from "./status-select"
+import { useToast } from "@/lib/toast-context"
 
 interface CreateTaskDialogProps {
   projectId: number
@@ -17,6 +18,7 @@ export default function CreateTaskDialog({
   onClose,
 }: CreateTaskDialogProps) {
   const router = useRouter()
+  const { success, error: showErrorToast } = useToast()
   const [title, setTitle] = useState("")
   const [assignedTo, setAssignedTo] = useState("")
   const [status, setStatus] = useState<"pending" | "in_progress" | "done">(
@@ -47,14 +49,19 @@ export default function CreateTaskDialog({
       const data = await response.json()
 
       if (!response.ok) {
-        setError(data.error || "Failed to create task")
+        const errorMsg = data.error || "Failed to create task"
+        setError(errorMsg)
+        showErrorToast(errorMsg)
         return
       }
 
+      success("Task created successfully")
       router.refresh()
       onClose()
     } catch (err) {
-      setError("An error occurred. Please try again.")
+      const errorMsg = "An error occurred. Please try again."
+      setError(errorMsg)
+      showErrorToast(errorMsg)
       console.error(err)
     } finally {
       setIsLoading(false)

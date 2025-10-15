@@ -4,6 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { X, AlertTriangle } from "lucide-react"
 import { Task } from "@/lib/types"
+import { useToast } from "@/lib/toast-context"
 
 interface DeleteTaskDialogProps {
   task: Task
@@ -15,6 +16,7 @@ export default function DeleteTaskDialog({
   onClose,
 }: DeleteTaskDialogProps) {
   const router = useRouter()
+  const { success, error: showErrorToast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
 
@@ -30,14 +32,19 @@ export default function DeleteTaskDialog({
       const data = await response.json()
 
       if (!response.ok) {
-        setError(data.error || "Failed to delete task")
+        const errorMsg = data.error || "Failed to delete task"
+        setError(errorMsg)
+        showErrorToast(errorMsg)
         return
       }
 
+      success("Task deleted successfully")
       router.refresh()
       onClose()
     } catch (err) {
-      setError("An error occurred. Please try again.")
+      const errorMsg = "An error occurred. Please try again."
+      setError(errorMsg)
+      showErrorToast(errorMsg)
       console.error(err)
     } finally {
       setIsLoading(false)

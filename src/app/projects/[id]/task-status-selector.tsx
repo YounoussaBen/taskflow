@@ -4,6 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Task, TaskStatus } from "@/lib/types"
 import StatusSelect from "./status-select"
+import { useToast } from "@/lib/toast-context"
 
 interface TaskStatusSelectorProps {
   task: Task
@@ -12,6 +13,7 @@ interface TaskStatusSelectorProps {
 
 export default function TaskStatusSelector({ task }: TaskStatusSelectorProps) {
   const router = useRouter()
+  const { success, error } = useToast()
   const [isLoading, setIsLoading] = useState(false)
 
   async function handleStatusChange(newStatus: TaskStatus) {
@@ -26,15 +28,20 @@ export default function TaskStatusSelector({ task }: TaskStatusSelectorProps) {
         body: JSON.stringify({ status: newStatus }),
       })
 
+      const data = await response.json()
+
       if (!response.ok) {
-        const data = await response.json()
         console.error("Failed to update status:", data.error)
+        error(data.error || "Failed to update task status")
         return
       }
 
+      const statusLabel = newStatus.replace("_", " ")
+      success(`Task status updated to ${statusLabel}`)
       router.refresh()
     } catch (err) {
       console.error("Error updating status:", err)
+      error("An error occurred while updating task status")
     } finally {
       setIsLoading(false)
     }

@@ -7,6 +7,7 @@ import { Task } from "@/lib/types"
 import { getUsers } from "@/lib/data"
 import MenuSelect from "./menu-select"
 import StatusSelect from "./status-select"
+import { useToast } from "@/lib/toast-context"
 
 interface EditTaskDialogProps {
   task: Task
@@ -15,6 +16,7 @@ interface EditTaskDialogProps {
 
 export default function EditTaskDialog({ task, onClose }: EditTaskDialogProps) {
   const router = useRouter()
+  const { success, error: showErrorToast } = useToast()
   const [title, setTitle] = useState(task.title)
   const [assignedTo, setAssignedTo] = useState(task.assignedTo)
   const [status, setStatus] = useState(task.status)
@@ -42,14 +44,19 @@ export default function EditTaskDialog({ task, onClose }: EditTaskDialogProps) {
       const data = await response.json()
 
       if (!response.ok) {
-        setError(data.error || "Failed to update task")
+        const errorMsg = data.error || "Failed to update task"
+        setError(errorMsg)
+        showErrorToast(errorMsg)
         return
       }
 
+      success("Task updated successfully")
       router.refresh()
       onClose()
     } catch (err) {
-      setError("An error occurred. Please try again.")
+      const errorMsg = "An error occurred. Please try again."
+      setError(errorMsg)
+      showErrorToast(errorMsg)
       console.error(err)
     } finally {
       setIsLoading(false)

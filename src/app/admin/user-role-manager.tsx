@@ -1,16 +1,17 @@
 "use client"
 
-import { updateUserRole } from "@/lib/data"
 import type { Role, User } from "@/lib/types"
 import { useState } from "react"
 import { Loader2 } from "lucide-react"
 import MenuSelect from "../projects/[id]/menu-select"
+import { useToast } from "@/lib/toast-context"
 
 type Props = { users: User[] }
 
 export default function UserRoleManager({ users }: Props) {
   const [localUsers, setLocalUsers] = useState<User[]>(users)
   const [savingEmail, setSavingEmail] = useState<string | null>(null)
+  const { success, error } = useToast()
 
   const roles: Role[] = ["admin", "manager", "member"]
 
@@ -22,14 +23,37 @@ export default function UserRoleManager({ users }: Props) {
     return chars.toUpperCase()
   }
 
-  const handleRoleChange = (email: string, role: Role) => {
+  const handleRoleChange = async (email: string, role: Role) => {
     setSavingEmail(email)
-    // Update global in-memory data and local UI state
-    updateUserRole(email, role)
-    setLocalUsers(prev =>
-      prev.map(u => (u.email === email ? { ...u, role } : u))
-    )
-    setSavingEmail(null)
+
+    try {
+      const response = await fetch(
+        `/api/admin/users/${encodeURIComponent(email)}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ role }),
+        }
+      )
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        error(data.error || "Failed to update user role")
+        return
+      }
+
+      // Update local UI state on success
+      setLocalUsers(prev =>
+        prev.map(u => (u.email === email ? { ...u, role } : u))
+      )
+      success(`User role updated to ${role}`)
+    } catch (err) {
+      console.error("Error updating user role:", err)
+      error("An error occurred while updating user role")
+    } finally {
+      setSavingEmail(null)
+    }
   }
 
   return (

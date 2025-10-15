@@ -3,9 +3,11 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Eye, EyeOff, Loader2, Mail, Lock, ChevronRight } from "lucide-react"
+import { useToast } from "@/lib/toast-context"
 
 export default function LoginForm() {
   const router = useRouter()
+  const { success, error: showErrorToast } = useToast()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
@@ -27,15 +29,22 @@ export default function LoginForm() {
       const data = await response.json()
 
       if (!response.ok) {
-        setError(data.error || "Invalid credentials")
+        const errorMsg = data.error || "Invalid credentials"
+        setError(errorMsg)
+        showErrorToast(errorMsg)
         return
       }
 
-      // Redirect to dashboard on success
-      router.push("/dashboard")
-      router.refresh()
+      // Show success message and redirect
+      success("Login successful! Redirecting...")
+      setTimeout(() => {
+        router.push("/dashboard")
+        router.refresh()
+      }, 500)
     } catch (err) {
-      setError("An error occurred. Please try again.")
+      const errorMsg = "An error occurred. Please try again."
+      setError(errorMsg)
+      showErrorToast(errorMsg)
       console.error(err)
     } finally {
       setIsLoading(false)
