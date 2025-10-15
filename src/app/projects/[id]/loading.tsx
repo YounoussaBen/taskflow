@@ -1,4 +1,12 @@
-export default function Loading() {
+import { cookies } from "next/headers"
+
+export default async function Loading() {
+  const cookieStore = await cookies()
+  const sessionCookie = cookieStore.get("taskflow_session")
+  let role: string | null = null
+  try {
+    role = sessionCookie?.value ? JSON.parse(sessionCookie.value).role : null
+  } catch {}
   return (
     <div className="min-h-screen bg-background">
       <div className="min-h-dvh md:flex">
@@ -28,7 +36,9 @@ export default function Loading() {
                   </div>
                 </div>
               </div>
-              <div className="h-10 w-32 animate-pulse rounded-lg bg-accent" />
+              {role && role !== "member" ? (
+                <div className="h-10 w-32 animate-pulse rounded-lg bg-accent" />
+              ) : null}
             </div>
           </div>
 

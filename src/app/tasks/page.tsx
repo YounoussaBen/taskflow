@@ -3,7 +3,13 @@ import { getTasks, getProjects } from "@/lib/data"
 import Sidebar from "@/components/sidebar"
 import TopbarMobile from "@/components/topbar-mobile"
 import Link from "next/link"
-import { Clock, CheckCircle2, AlertCircle } from "lucide-react"
+import {
+  Clock,
+  CheckCircle2,
+  AlertCircle,
+  Folder,
+  ArrowRight,
+} from "lucide-react"
 
 export const dynamic = "force-dynamic"
 
@@ -47,13 +53,13 @@ export default async function TasksPage() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "done":
-        return "bg-green-100 text-green-800"
+        return "bg-green-500/10 text-green-700"
       case "in_progress":
-        return "bg-blue-100 text-blue-800"
+        return "bg-blue-500/10 text-blue-700"
       case "pending":
-        return "bg-yellow-100 text-yellow-800"
+        return "bg-yellow-500/10 text-yellow-700"
       default:
-        return "bg-gray-100 text-gray-800"
+        return "bg-foreground/5 text-foreground"
     }
   }
 
@@ -76,7 +82,7 @@ export default async function TasksPage() {
           </div>
 
           {tasks.length === 0 ? (
-            <div className="rounded-lg border border-border bg-surface p-12 text-center">
+            <div className="rounded-2xl bg-surface p-12 text-center">
               <AlertCircle className="mx-auto h-12 w-12 text-secondary" />
               <h3 className="mt-4 text-lg font-semibold">No tasks found</h3>
               <p className="mt-2 text-secondary">
@@ -86,71 +92,48 @@ export default async function TasksPage() {
               </p>
             </div>
           ) : (
-            <div className="rounded-lg border border-border bg-surface">
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="border-b border-border bg-background">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-sm font-semibold">
-                        Task
-                      </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold">
-                        Project
-                      </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold">
-                        Assigned To
-                      </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold">
-                        Status
-                      </th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border">
-                    {tasks.map(task => (
-                      <tr
-                        key={task.id}
-                        className="transition-colors hover:bg-background/50"
-                      >
-                        <td className="px-6 py-4">
+            <div className="rounded-2xl bg-surface p-6">
+              <ul className="space-y-1">
+                {tasks.map(task => (
+                  <li key={task.id}>
+                    <Link
+                      href={`/projects/${task.projectId}`}
+                      className="group flex items-center justify-between rounded-lg p-4 sm:p-5 transition-colors hover:bg-background focus:outline-none focus:ring-2 focus:ring-accent/40"
+                    >
+                      <div className="flex min-w-0 flex-1 items-center gap-4">
+                        <span className="shrink-0">
+                          {getStatusIcon(task.status)}
+                        </span>
+                        <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-3">
-                            {getStatusIcon(task.status)}
-                            <span className="font-medium">{task.title}</span>
+                            <span className="truncate text-base font-semibold md:text-lg group-hover:text-accent">
+                              {task.title}
+                            </span>
+                            <span
+                              className={`rounded-full px-2.5 py-0.5 text-[11px] font-medium md:text-xs ${getStatusColor(task.status)}`}
+                            >
+                              {task.status.replace("_", " ")}
+                            </span>
                           </div>
-                        </td>
-                        <td className="px-6 py-4 text-secondary">
-                          <Link
-                            href={`/projects/${task.projectId}`}
-                            className="hover:text-accent hover:underline"
-                          >
-                            {getProjectName(task.projectId)}
-                          </Link>
-                        </td>
-                        <td className="px-6 py-4 text-secondary">
-                          {task.assignedTo}
-                        </td>
-                        <td className="px-6 py-4">
-                          <span
-                            className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getStatusColor(task.status)}`}
-                          >
-                            {task.status.replace("_", " ")}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4">
-                          <Link
-                            href={`/projects/${task.projectId}`}
-                            className="text-sm font-medium text-accent hover:underline"
-                          >
-                            View
-                          </Link>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                          <div className="mt-1 flex flex-wrap items-center gap-3 text-sm text-secondary">
+                            <span className="inline-flex items-center gap-1">
+                              <Folder className="h-4 w-4" />
+                              <span className="truncate">
+                                {getProjectName(task.projectId)}
+                              </span>
+                            </span>
+                            <span className="hidden text-secondary sm:inline">
+                              •
+                            </span>
+                            <span className="truncate">{task.assignedTo}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <ArrowRight className="ml-3 h-4 w-4 text-secondary transition-transform group-hover:translate-x-0.5 group-hover:text-accent" />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
             </div>
           )}
         </main>

@@ -1,9 +1,13 @@
 import { requireAuth } from "@/lib/auth"
-import { getProjects, getTaskStatsByProject } from "@/lib/data"
+import {
+  getProjects,
+  getTaskStatsByProject,
+  getTasksByAssignee,
+} from "@/lib/data"
 import Sidebar from "@/components/sidebar"
 import TopbarMobile from "@/components/topbar-mobile"
 import Link from "next/link"
-import { Folder, User, ArrowRight, TrendingUp, Plus } from "lucide-react"
+import { Folder, User, ArrowRight, TrendingUp } from "lucide-react"
 
 export const dynamic = "force-dynamic"
 
@@ -16,8 +20,12 @@ export default async function ProjectsPage() {
   if (session.role === "manager") {
     // Managers see only their own projects
     projects = allProjects.filter(p => p.owner === session.email)
+  } else if (session.role === "member") {
+    // Members see only projects that contain tasks assigned to them
+    const myTasks = getTasksByAssignee(session.email)
+    const allowedIds = new Set(myTasks.map(t => t.projectId))
+    projects = allProjects.filter(p => allowedIds.has(p.id))
   }
-  // Admin and members see all projects
 
   return (
     <div className="min-h-screen bg-background">
@@ -43,12 +51,6 @@ export default async function ProjectsPage() {
                 className="inline-flex items-center gap-2 rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium hover:border-accent"
               >
                 <TrendingUp className="h-4 w-4" /> View Tasks
-              </Link>
-              <Link
-                href="/projects"
-                className="inline-flex items-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-medium text-accent-foreground hover:bg-accent/90"
-              >
-                <Plus className="h-4 w-4" /> New Project
               </Link>
             </div>
           </div>

@@ -21,8 +21,15 @@ export const dynamic = "force-dynamic"
 
 export default async function DashboardPage() {
   const session = await requireAuth()
-  const projects = getProjects()
+  // Compute role-aware projects list
+  let projects = getProjects()
   const myTasks = getTasksByAssignee(session.email)
+  if (session.role === "manager") {
+    projects = getProjectsByOwner(session.email)
+  } else if (session.role === "member") {
+    const allowedIds = new Set(myTasks.map(t => t.projectId))
+    projects = projects.filter(p => allowedIds.has(p.id))
+  }
   const myProjects = getProjectsByOwner(session.email)
   const allTasks = getTasks()
 

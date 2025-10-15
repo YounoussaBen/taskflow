@@ -12,7 +12,7 @@ export default function Loading() {
             <div className="h-4 w-16 animate-pulse rounded-full bg-background" />
           </div>
 
-          {/* Header skeleton */}
+          {/* Header skeleton (no blue action button) */}
           <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
             <div className="space-y-2">
               <div className="h-8 w-40 animate-pulse rounded-lg bg-surface" />
@@ -20,7 +20,6 @@ export default function Loading() {
             </div>
             <div className="flex gap-2">
               <div className="h-10 w-36 animate-pulse rounded-lg border border-border bg-surface" />
-              <div className="h-10 w-32 animate-pulse rounded-lg bg-accent" />
             </div>
           </div>
 
